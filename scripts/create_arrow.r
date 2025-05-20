@@ -29,8 +29,12 @@ ArrowFiles <- createArrowFiles(
   inputFiles = frag,
   sampleNames = prefix,
   minTSS = 0, minFrags = 0,
+  maxFrags = 1e+08,
   addTileMat = TRUE,
+  TileMatParams = list(blacklist = NULL),
   addGeneScoreMat = TRUE,
+  excludeChr = NULL,
+  GeneScoreMatParams = list(blacklist = NULL),
   force = TRUE,
   cleanTmp = FALSE # DO NOT remove tmp, which may lead to disruption of other arrow processes!
 )
