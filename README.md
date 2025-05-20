@@ -4,6 +4,46 @@ Data preprocessing and analysis pipeline for dscNanoATAC &amp; dscNanoCUT
 ## Introduction
 This repository contains scripts for preprocessing and analyzing data from dscNanoATAC and dscNanoCUT, droplet-based methods for single-cell epigenome profiling using Nanopore long-read seqeuencing.
 
+## Install
+This workflow is based on [Snakemake](https://snakemake.readthedocs.io/en/stable/) and [conda](https://anaconda.org/) environment.
+
+if you don't have mamba, install it first:
+```
+    conda update conda
+    conda install mamba
+```
+create environmet for scNanoSeq
+```
+    mamba env create -f environment.yaml
+```
+Download UCSC Utils 
+```
+    rsync -aP rsync://hgdownload.soe.ucsc.edu/genome/admin/exe/linux.x86_64/bedGraphToBigWig /path/to/envs/scNanoSeq/bin/
+```
+
+Then, install [ArchR](https://www.archrproject.com/) according to its tutorial. 
+> [!CAUTION]
+> ArchR (v1.0.1) should be used to create arrow files for each sequencing library due to its compatibility to long fragment length of dscNanoATAC/dscNanoCUT data (In the newer version, fragments longer than 1000 bp will be discarded)  
+
+It takes ~ 30 min to finish the installation.
+
+## Prepare references
+1. Download the reference genome and chrom size file into the corresponding folder under [database](database). e.g.
+```
+    database/hg38/hg38.fa
+    database/hg38/hg38.chrom.size
+```
+2. Build mimimap2 index:
+```
+    minimap2 -d ${ref}.mmi ${ref}.fa
+```
+3. Download the snp files into database/snp (OPTIONAL)
+```
+    # For GM12878
+    wget https://s3.eu-central-1.amazonaws.com/platinum-genomes/2017-1.0/hg38/small_variants/NA12878/NA12878.vcf.gz
+    https://s3.eu-central-1.amazonaws.com/platinum-genomes/wget 2017-1.0/hg38/small_variants/NA12878/NA12878.vcf.gz.tbi
+```
+
 ## Usage
 ### 1. demultiplex of sequencing library
 We use [Nanoplexer](https://github.com/hanyue36/nanoplexer) for library demultiplexing:
@@ -38,9 +78,9 @@ We use [Nanoplexer](https://github.com/hanyue36/nanoplexer) for library demultip
 
 ### 3. downstream analyses
 [ArchR](https://www.archrproject.com/index.html) is recommeded for downstream analyses.  
-> [!CAUTION]
-> ArchR (v1.0.1) should be used to create arrow files for each sequencing library due to its compatibility to long fragment length of dscNanoATAC/dscNanoCUT data (In the newer version, fragments longer than 1000 bp will be discarded)  
+
 
 For allele-specific peaks analysie, please refer to [dscNanoSeq_haplotype_phasing.smk](pipeline/dscNanoSeq_haplotype_phasing.smk)
 
 For co-accessibility analysis, please refer to [dscNanoSeq_coaccessibility.smk](pipeline/dscNanoSeq_coaccessibility.smk)
+
