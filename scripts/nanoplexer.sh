@@ -1,6 +1,4 @@
 #!/bin/bash
-
-source activate nanopore
 nanoplexer \
 	-b barcode.fa \
 	-t 16 \

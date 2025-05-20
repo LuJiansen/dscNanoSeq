@@ -1,5 +1,5 @@
 ref = "GRCh38" # r mm10, GRCh38_mm10_mixed
-base_dir = '/mnt/d/GitHub/dscNanoSeq'
+base_dir = '/mnt/d/GitHub/dscNanoSeq/'
 pip_dir = base_dir + 'pipeline/'
 script_dir = base_dir + 'scripts/'
 database_dir = base_dir + 'database/'
@@ -89,14 +89,12 @@ rule trim:
     log:
         "logs/{sample}_{chunk}_cutadpt.log",
     shell: """
-        set +u; source activate cutadaptenv; set -u
         cutadapt \
             -q 7 -e 0.25 -j {threads} -m 100 \
             -a ACACTCTTTCCCTACACGACGCTCTTCCGATCT...AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT \
             -o {output} \
             {input} \
             > {log}
-        set +u; conda deactivate; set -u
     """
 
 # demultiplex barcodes and UMIs in 5'
@@ -112,7 +110,6 @@ rule umitools_run1:
     log:
         "logs/{sample}_{chunk}_umitools_run1.log",
     shell: """
-        set +u; source activate py39; set -u
         # umi_tools version 1.1.5
         umi_tools extract \
             --extract-method=regex \
@@ -121,7 +118,6 @@ rule umitools_run1:
             --filtered-out {output.filtered} \
             -I {input.fq} \
             -L {log} -S {output.tagged}
-        set +u; conda deactivate; set -u
     """
 
 # make reverse-complement of the run1 results,
@@ -157,7 +153,6 @@ rule umitools_run2_tagged:
     log:
         "logs/{sample}_{chunk}_umitools_run2_tagged.log",
     shell: """
-        set +u; source activate py39; set -u
         # umi_tools version 1.1.5
         umi_tools extract \
             --extract-method=regex \
@@ -166,7 +161,6 @@ rule umitools_run2_tagged:
             --filtered-out {output.filtered} \
             -I {input.fq} \
             -L {log} -S {output.tagged}
-        set +u; conda deactivate; set -u
     """
 
 rule umitools_run2_filtered:
@@ -181,7 +175,6 @@ rule umitools_run2_filtered:
     log:
         "logs/{sample}_{chunk}_umitools_run2_filtered.log",
     shell: """
-        set +u; source activate py39; set -u
         # umi_tools version 1.1.5
         umi_tools extract \
             --extract-method=regex \
@@ -190,7 +183,6 @@ rule umitools_run2_filtered:
             --filtered-out {output.filtered} \
             -I {input.fq} \
             -L {log} -S {output.tagged}
-        set +u; conda deactivate; set -u
     """
 
 # For reads detected dual barcodes, we evaluate their accordance
@@ -253,9 +245,7 @@ rule fastq_stats:
     output:
         temp("trim/{sample}_{chunk}_fastq_stats.txt"),
     shell: """
-        set +u; source activate nanopore; set -u
         seqkit stats -a -T -j {threads} {input} > {output}
-        set +u; conda deactivate; set -u
     """
 
 rule merge_fastqs:
@@ -296,7 +286,6 @@ rule minimap2:
         "logs/{sample}_{chunk}_mm2.log",
     threads: 20,
     shell: """
-        set +u; source activate nanopore; set -u
         minimap2 -t {threads} \
             --split-prefix mapping/{wildcards.sample}_{wildcards.chunk} \
             -ax map-ont \
@@ -304,7 +293,6 @@ rule minimap2:
             {input.ref} \
             {input.fq} 2>{log} |
         samtools view -o {output} -
-        set +u; conda deactivate; set -u
         """
 
 # add barcodes to bam tag
@@ -314,7 +302,6 @@ rule add_barcode:
     output:
         temp("mapping/{sample}_{chunk}_bc.bam"),
     shell: """
-        set +u; source activate snakemake; set -u
         cat <(samtools view -H {input}) \
             <(samtools view {input} |
             awk -vOFS='\\t' '{{
@@ -322,7 +309,6 @@ rule add_barcode:
                     print $0,"CB:Z:"name[2],"RX:Z:"name[3]
             }}') |
         samtools view -bS - > {output}
-        set +u; conda deactivate; set -u
     """
 
 rule map_stats:
@@ -331,7 +317,6 @@ rule map_stats:
     output:
         temp("mapping/{sample}_{chunk}_bc.bam.stats"),
     shell: """
-        set +u; source activate snakemake; set -u
         bedtools bamtobed -i {input} | 
         awk '{{
             split($4, name, "_")
@@ -344,7 +329,6 @@ rule map_stats:
         }}' OFS='\\t' | sort -k1 | 
         bedtools groupby -g 1 -c 1,2,2,2,2,2,3,4 -o count,sum,min,max,mean,median,sum,sum |
         awk '{{print $1,$2,$3,$4,$5,$6,$7,$8/$2,$9/$2}}' OFS='\\t' > {output}
-        set +u; conda deactivate; set -u
     """
 
 rule collect_map_stats:
@@ -356,9 +340,7 @@ rule collect_map_stats:
     params:
         "_bc.bam.stats",
     shell: """
-        set +u; source activate radian; set -u
         Rscript {input.script} "mapping" {params} {output}
-        set +u; conda deactivate; set -u
     """
 
 # filter alignments, only unique mapped reads with clipping length < threshold were remained.
@@ -371,13 +353,11 @@ rule filter:
         clip = clip_length,
         tmp = "tmp/{sample}_{chunk}",
     shell: """
-        set +u; source activate nanopore; set -u
         if [ ! -d tmp ];then
             mkdir tmp
         fi 
         samtools view -ShuF 2308 -q 30 -e "sclen < {params.clip} && hclen < {params.clip}" {input} |
         samtools sort -T {params.tmp} -o {output} - 
-        set +u; conda deactivate; set -u
         """
 
 rule filter_stats:
@@ -386,7 +366,6 @@ rule filter_stats:
     output:
         temp("mapping/{sample}_{chunk}_bc_q30.bam.stats"),
     shell: """
-        set +u; source activate snakemake; set -u
         bedtools bamtobed -i {input} | 
         awk '{{
             split($4, name, "_")
@@ -399,7 +378,6 @@ rule filter_stats:
         }}' OFS='\\t' | sort -k1 | 
         bedtools groupby -g 1 -c 1,2,2,2,2,2,3,4 -o count,sum,min,max,mean,median,sum,sum |
         awk '{{print $1,$2,$3,$4,$5,$6,$7,$8/$2,$9/$2}}' OFS='\\t' > {output}
-        set +u; conda deactivate; set -u
     """
 
 rule collect_filter_stats:
@@ -411,9 +389,7 @@ rule collect_filter_stats:
     params:
         "_bc_q30.bam.stats",
     shell: """
-        set +u; source activate radian; set -u
         Rscript {input.script} "mapping" {params} {output}
-        set +u; conda deactivate; set -u
     """
 
 rule merge_bams:
@@ -424,10 +400,8 @@ rule merge_bams:
         bam = temp("mapping/{sample}_bc_q30.bam"),
     threads: 20,
     shell: """
-        set +u; source activate nanopore; set -u
         ls {input} > {output.list}
         samtools merge -@ {threads} -b {output.list} -o {output.bam}
-        set +u; conda deactivate; set -u
     """
 
 # dedup with umi_tools, since UMIs tend to be overestimated due to the sequencing 
@@ -441,7 +415,6 @@ rule umi_tools_dedup:
     log:
         "logs/{sample}_dedup.log",
     shell: """
-        set +u; source activate py39; set -u
         # umi_tools version 1.1.5
         if [ ! -s {input}.bai ];then
             samtools index {input}
@@ -455,7 +428,6 @@ rule umi_tools_dedup:
             --temp-dir=mapping \
             -I {input} \
             -L {log} -S {output}
-        set +u; conda deactivate; set -u
     """
 
 # chr start end cellname MAPQ strand
@@ -489,7 +461,6 @@ rule dedup_stats:
     output:
         "mapping/{sample}_dedup.bam.stats",
     shell: """
-        set +u; source activate snakemake; set -u
         echo -e "barcode\\tnFrags\\tdatasize\\tmin_len\\tmax_len\\tmean_len\\tmedian_len\\tMAQ20\\tMAQ30" > {output}
         zcat {input} |
         awk '{{
@@ -499,7 +470,6 @@ rule dedup_stats:
         }}' OFS='\\t' | sort -k1 | 
         bedtools groupby -g 1 -c 1,2,2,2,2,2,3,4 -o count,sum,min,max,mean,median,sum,sum |
         awk '{{print $1,$2,$3,$4,$5,$6,$7,$8/$2,$9/$2}}' OFS='\\t' >> {output}
-        set +u; conda deactivate; set -u
     """
 
 rule create_arrow:
@@ -511,14 +481,12 @@ rule create_arrow:
     params:
         ref = ref,
     shell: """
-        set +u; source activate r_env; set -u
         if [ ! -d arrow ];then
             mkdir -p arrow
         fi
         
         Rscript {input.script} {input.frag} {params.ref} {wildcards.sample}
         mv "{wildcards.sample}.arrow" arrow
-        set +u; conda deactivate; set -u
     """
 
 rule flank:

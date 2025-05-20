@@ -47,10 +47,8 @@ rule run_coaccessibility:
         "coaccessibility/{sample}_peak_{chr}_tmp.bed",
     threads: 10,
     shell: """
-        set +u; source activate radian; set -u
         awk -v c={wildcards.chr} '$1==c {{print $0}}' OFS='\\t' {input.peak} > {params}
         Rscript {input.script} {input.frag} {params} {threads} {output}
-        set +u; conda deactivate; set -u
     """
 
 rule collect_results:

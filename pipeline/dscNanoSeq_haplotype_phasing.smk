@@ -43,7 +43,6 @@ rule haplotag:
     log:
         "logs/{sample}_haplotyping.log",
     shell: """
-        set +u; source activate HiC; set -u
         if [ ! -s {input.bam}.bai ];then
             samtools index {input.bam}
         fi
@@ -55,7 +54,6 @@ rule haplotag:
             --tag-supplementary \
             --skip-missing-contigs \
             {input.snp} {input.bam} > {log}
-        set +u; conda deactivate; set -u
     """
 
 rule split_bam_HP1:
