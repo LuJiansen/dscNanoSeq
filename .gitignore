@@ -1,1 +1,5 @@
-/test
+/database/hg38/*
+/database/mm10/*
+/database/hg38_mm10_mixed/*
+/database/snp/*
+/database/mobi_whitelist_v2.txt
