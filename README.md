@@ -90,17 +90,7 @@ We use [Nanoplexer](https://github.com/hanyue36/nanoplexer) for library demultip
     ```
     snakemake -s pipeline/dscNanoSeq_preprocessing.smk -j 100 -k --profile slurm
     ```
-> [!WARNING]- [dscNanoSeq](#dscnanoseq)
-- [dscNanoSeq](#dscnanoseq)
-  - [Introduction](#introduction)
-  - [Install](#install)
-  - [Prepare references](#prepare-references)
-  - [Usage](#usage)
-    - [1. demultiplex of sequencing library](#1-demultiplex-of-sequencing-library)
-    - [2. preprocessing](#2-preprocessing)
-    - [3. downstream analyses](#3-downstream-analyses)
-  - [Example data](#example-data)
-
+> [!WARNING]
 > Don't forget to modified the dscNanoSeq_preprocessing.smk to set the right reference genome (e.g. hg38 or mm10).
 
 ### 3. downstream analyses
