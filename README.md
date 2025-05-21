@@ -23,9 +23,9 @@ Download UCSC Utils
 
 Then, install [ArchR](https://www.archrproject.com/) according to its tutorial. 
 > [!CAUTION]
-> ArchR (v1.0.1) should be used to create arrow files for each sequencing library due to its compatibility to long fragment length of dscNanoATAC/dscNanoCUT data (In the newer version, fragments longer than 1000 bp will be discarded)  
+> ArchR (v1.0.1) should be install to create arrow files for each sequencing library due to its compatibility to long fragment length of dscNanoATAC/dscNanoCUT data (In the newer version, fragments longer than 1000 bp will be discarded); The newer version of ArchR is suitable for downstream analyses.
 
-It takes ~ 30 min to finish the installation.
+It takes ~ 30 min to finish the installation, depending on the downloading speed.
 
 ## Prepare references
 1. Download the reference genome and chrom size file into the corresponding folder under [database](database). e.g.
@@ -45,6 +45,11 @@ It takes ~ 30 min to finish the installation.
 ```
 
 ## Usage
+Before run the pipeline, please set the folder containing this repository into your global environment:
+```
+export DSCNANOSEQ_DIR=/path/to/dscNanoSeq/
+```
+
 ### 1. demultiplex of sequencing library
 We use [Nanoplexer](https://github.com/hanyue36/nanoplexer) for library demultiplexing:
 - inputs:
@@ -75,6 +80,7 @@ We use [Nanoplexer](https://github.com/hanyue36/nanoplexer) for library demultip
     ```
     snakemake -s pipeline/dscNanoSeq_preprocessing.smk -j 100 -k --profile slurm
     ```
+Notes: Please modified the dscNanoSeq_preprocessing.smk to set the reference genome (e.g. hg38 or mm10) and working directory.
 
 ### 3. downstream analyses
 [ArchR](https://www.archrproject.com/index.html) is recommeded for downstream analyses.  
@@ -84,3 +90,16 @@ For allele-specific peaks analysie, please refer to [dscNanoSeq_haplotype_phasin
 
 For co-accessibility analysis, please refer to [dscNanoSeq_coaccessibility.smk](pipeline/dscNanoSeq_coaccessibility.smk)
 
+## Example data
+We provide a minimal test data for preprocessing of dscNanoSeq, which could be found in test/data, the expected output is in test/output.
+```
+    cd test/data
+    ln -s ../../scripts/nanoplexer.sh 
+    sh nanoplexer.sh pass.fastq.gz
+
+    ln -s ../../pipeline/dscNanoSeq_preprocessing.smk 
+    snakemake -s dscNanoSeq_preprocessing.smk -j 50 -k
+```
+Note that due to the sparsity of the test data the 'addGeneScoreMat' step in ArchR will be failed, please turn the 'addGeneScoreMat' parameter off in the [create_arrow.r](scripts/create_arrow.r) when running the test data.
+
+This example data takes ~ 10 min to finish in a 10 threads computation cluster.
