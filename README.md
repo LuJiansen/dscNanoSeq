@@ -1,6 +1,16 @@
 # dscNanoSeq
 Data preprocessing and analysis pipeline for dscNanoATAC &amp; dscNanoCUT
 
+- [dscNanoSeq](#dscnanoseq)
+  - [Introduction](#introduction)
+  - [Install](#install)
+  - [Prepare references](#prepare-references)
+  - [Usage](#usage)
+    - [1. demultiplex of sequencing library](#1-demultiplex-of-sequencing-library)
+    - [2. preprocessing](#2-preprocessing)
+    - [3. downstream analyses](#3-downstream-analyses)
+  - [Example data](#example-data)
+
 ## Introduction
 This repository contains scripts for preprocessing and analyzing data from dscNanoATAC and dscNanoCUT, droplet-based methods for single-cell epigenome profiling using Nanopore long-read seqeuencing.
 
@@ -80,7 +90,18 @@ We use [Nanoplexer](https://github.com/hanyue36/nanoplexer) for library demultip
     ```
     snakemake -s pipeline/dscNanoSeq_preprocessing.smk -j 100 -k --profile slurm
     ```
-Notes: Please modified the dscNanoSeq_preprocessing.smk to set the reference genome (e.g. hg38 or mm10) and working directory.
+> [!WARNING]- [dscNanoSeq](#dscnanoseq)
+- [dscNanoSeq](#dscnanoseq)
+  - [Introduction](#introduction)
+  - [Install](#install)
+  - [Prepare references](#prepare-references)
+  - [Usage](#usage)
+    - [1. demultiplex of sequencing library](#1-demultiplex-of-sequencing-library)
+    - [2. preprocessing](#2-preprocessing)
+    - [3. downstream analyses](#3-downstream-analyses)
+  - [Example data](#example-data)
+
+> Don't forget to modified the dscNanoSeq_preprocessing.smk to set the right reference genome (e.g. hg38 or mm10).
 
 ### 3. downstream analyses
 [ArchR](https://www.archrproject.com/index.html) is recommeded for downstream analyses.  
@@ -100,6 +121,7 @@ We provide a minimal test data for preprocessing of dscNanoSeq, which could be f
     ln -s ../../pipeline/dscNanoSeq_preprocessing.smk 
     snakemake -s dscNanoSeq_preprocessing.smk -j 50 -k
 ```
-Note that due to the sparsity of the test data the 'addGeneScoreMat' step in ArchR will be failed, please turn the 'addGeneScoreMat' parameter off in the [create_arrow.r](scripts/create_arrow.r) when running the test data.
+> [!NOTE]
+> Due to the sparsity of the test data the 'addGeneScoreMat' step in ArchR will be failed, please turn the 'addGeneScoreMat' parameter off in the [create_arrow.r](scripts/create_arrow.r) when running the test data.
 
 This example data takes ~ 10 min to finish in a 10 threads computation cluster.
