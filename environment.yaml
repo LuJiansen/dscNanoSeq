@@ -1,4 +1,4 @@
-name: scNanoSeq
+name: dscNanoSeq
 channels:
   - conda-forge
   - bioconda
