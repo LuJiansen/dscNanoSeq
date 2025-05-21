@@ -1,5 +1,15 @@
 ref = "GRCh38" # r mm10, GRCh38_mm10_mixed
-base_dir = '/mnt/d/GitHub/dscNanoSeq/'
+base_var = 'DSCNANOSEQ_DIR'
+#base_dir = '/path/to/Github/dscNanoSeq/'
+
+if base_var not in os.environ:
+    print(f"Error: Environment variable {base_var} is not set", file=sys.stderr)
+    print("Please set this variable before running the program", file=sys.stderr)
+    sys.exit(1)  # Exit with non-zero status code indicating error
+
+base_dir = os.environ[base_var]
+print(f"{base_var} = {base_dir}")
+
 pip_dir = base_dir + 'pipeline/'
 script_dir = base_dir + 'scripts/'
 database_dir = base_dir + 'database/'
